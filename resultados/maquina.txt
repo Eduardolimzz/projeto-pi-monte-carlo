@@ -1,0 +1,84 @@
+# Ambiente de medicao do baseline
+# gerado por scripts/medir.sh em 2026-09-10T18:58:39-03:00
+
+## CPU (lscpu)
+Arquitetura:                               x86_64
+Modo(s) operacional da CPU:                32-bit, 64-bit
+Tamanhos de endereço:                      39 bits physical, 48 bits virtual
+Ordem dos bytes:                           Little Endian
+CPU(s):                                    12
+Lista de CPU(s) on-line:                   0-11
+ID de fornecedor:                          GenuineIntel
+Nome do modelo:                            Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz
+Família da CPU:                            6
+Modelo:                                    165
+Thread(s) per núcleo:                      2
+Núcleo(s) por soquete:                     6
+Soquete(s):                                1
+Step:                                      3
+CPU(s) MHz de escala:                      19%
+CPU MHz máx.:                              4300,0000
+CPU MHz mín.:                              800,0000
+BogoMIPS:                                  5799,77
+Opções:                                    fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid mpx rdseed adx smap clflushopt intel_pt xsaveopt xsavec xgetbv1 xsaves dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp vnmi md_clear flush_l1d arch_capabilities
+Virtualização:                             VT-x
+cache de L1d:                              192 KiB (6 instâncias)
+cache de L1i:                              192 KiB (6 instâncias)
+cache de L2:                               1,5 MiB (6 instâncias)
+cache de L3:                               12 MiB (1 instância)
+Nó(s) de NUMA:                             1
+CPU(s) de nó0 NUMA:                        0-11
+Vulnerabilidade Gather data sampling:      Vulnerable
+Vulnerabilidade Ghostwrite:                Not affected
+Vulnerabilidade Indirect target selection: Mitigation; Aligned branch/return thunks
+Vulnerabilidade Itlb multihit:             KVM: Mitigation: Split huge pages
+Vulnerabilidade L1tf:                      Not affected
+Vulnerabilidade Mds:                       Not affected
+Vulnerabilidade Meltdown:                  Not affected
+Vulnerabilidade Mmio stale data:           Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerabilidade Old microcode:             Not affected
+Vulnerabilidade Reg file data sampling:    Not affected
+Vulnerabilidade Retbleed:                  Mitigation; Enhanced IBRS
+Vulnerabilidade Spec rstack overflow:      Not affected
+Vulnerabilidade Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerabilidade Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerabilidade Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop
+Vulnerabilidade Srbds:                     Mitigation; Microcode
+Vulnerabilidade Tsa:                       Not affected
+Vulnerabilidade Tsx async abort:           Not affected
+Vulnerabilidade Vmscape:                   Mitigation; IBPB before exit to userspace
+
+nproc: 12
+
+## Memoria (free -h)
+               total       usada       livre    compart.  buff/cache  disponível
+Mem.:           14Gi       7,6Gi       2,1Gi       204Mi       4,7Gi       7,4Gi
+Swap:          4,0Gi       644Ki       4,0Gi
+
+## Sistema (uname -a)
+Linux eduardo-pc 7.0.0-31-generic #31-Ubuntu SMP PREEMPT_DYNAMIC Sat Aug  1 04:26:38 UTC 2026 x86_64 GNU/Linux
+
+## Distribuicao (/etc/os-release)
+PRETTY_NAME="Ubuntu 26.04.1 LTS"
+NAME="Ubuntu"
+VERSION_ID="26.04"
+VERSION="26.04.1 LTS (Resolute Raccoon)"
+VERSION_CODENAME=resolute
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=resolute
+LOGO=ubuntu-logo
+
+## Compilador (g++ --version)
+g++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Copyright (C) 2025 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+## Flags de compilacao usadas pelo Makefile
+g++ -O2 -Wall -o sequencial/pi_seq sequencial/02_montecarlo_pi.cpp
