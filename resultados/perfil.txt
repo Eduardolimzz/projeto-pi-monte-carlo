@@ -1,0 +1,134 @@
+==========================================================
+ Perfilamento do baseline sequencial — pi por Monte Carlo
+ gerado por scripts/perfilar.sh em 2026-09-10T19:19:38-03:00
+==========================================================
+
+Fonte .................. sequencial/02_montecarlo_pi.cpp (nao modificado)
+Binario medido ......... sequencial/pi_seq (flags do Makefile)
+N ...................... 1000000000
+Repeticoes ............. 1 aquecimento + 5 medidas (media)
+Ferramenta por funcao .. gprof
+
+---------- (a) tempo total do processo x tempo do laco ----------
+
+trecho                        media (s)
+laco Monte Carlo               3.827745
+fora do laco                   0.000669
+total do processo              3.828414
+
+elapsed (time -v)              3.834000
+user time (time -v)            3.834000
+system time (time -v)          0.000000
+max RSS kB (time -v)               1848
+
+f = tempo_do_laco / tempo_total = 0.99982536
+
+O tempo do laco e o que o programa imprime: clock_gettime(CLOCK_MONOTONIC)
+aberto antes do for e fechado depois do calculo de pi. Fica de fora a
+leitura de argv, a inicializacao da semente, o printf e todo o custo de
+processo (exec, ligacao dinamica, init/fini da libc, saida).
+
+NOTA SOBRE A RESOLUCAO: o wall clock do /usr/bin/time -v tem apenas
+centissegundos (formato m:ss.cc). Como o custo fora do laco e da ordem
+de milissegundos, esse campo chega a sair MENOR que o tempo do laco, o
+que daria f > 1. Por isso o total usado no calculo de f vem de uma
+segunda passada, com o relogio do shell (EPOCHREALTIME, microssegundos)
+em volta do processo. Esse total inclui o fork/exec do shell, entao
+superestima levemente o custo fora do laco — ou seja, subestima f, que
+e o lado conservador para Amdahl.
+
+medidas individuais A2 (laco total_alta_resolucao):
+3.826991 3.827688
+3.833963 3.834613
+3.814448 3.815107
+3.820044 3.820688
+3.843280 3.843973
+
+medidas individuais A1 (elapsed user sys rss_kB):
+3.830000 3.83 0.00 1848
+3.820000 3.82 0.00 1848
+3.840000 3.84 0.00 1848
+3.840000 3.84 0.00 1848
+3.840000 3.84 0.00 1848
+
+---------- /usr/bin/time -v (ultima repeticao) ----------
+
+	Command being timed: "./sequencial/pi_seq 1000000000"
+	User time (seconds): 3.84
+	System time (seconds): 0.00
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.84
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1848
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 82
+	Voluntary context switches: 1
+	Involuntary context switches: 13
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+
+---------- (b) distribuicao por funcao (gprof) ----------
+
+perf nao pode ser usado nesta maquina:
+in /etc/sysctl.conf (e.g. kernel.perf_event_paranoid = <setting>)
+Error:
+Failure to open any events for recording.
+(kernel.perf_event_paranoid = 4)
+
+Binario instrumentado: g++ -O2 -Wall -pg -g (nome pi_pg, em diretorio temporario)
+
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+100.00      3.83     3.83                             main
+  0.00      3.83     0.00        2     0.00     0.00  agora()
+
+			Call graph
+
+
+granularity: each sample hit covers 4 byte(s) for 0.26% of 3.83 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]    100.0    3.83    0.00                 main [1]
+                0.00    0.00       2/2           agora() [8]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[8]      0.0    0.00    0.00       2         agora() [8]
+-----------------------------------------------
+
+Index by function name
+
+   [8] agora() (02_montecarlo_pi.cpp) [1] main
+
+AVISO: com -O2 a funcao xorshift() e 'static inline' e some dentro de
+main(), e o laco nao e uma funcao propria. Por isso o gprof concentra
+praticamente todo o tempo em main(): a granularidade por funcao nao
+separa o laco do resto. A separacao confiavel entre laco e overhead e
+a do item (a), por relogio.
+
+---------- (c) Amdahl ----------
+
+S(p) = 1 / ((1-f) + f/p),  E(p) = S(p)/p,  com f = 0.99982536
+
+     p        speedup     eficiencia
+     1         1.0000         1.0000
+     2         1.9997         0.9998
+     4         3.9979         0.9995
+     6         5.9948         0.9991
+     8         7.9902         0.9988
+    12        11.9770         0.9981
+    16        15.9582         0.9974
+   inf      5726.0650         0.0000
