@@ -41,7 +41,7 @@ int main(int argc, char **argv)
         int tid = omp_get_thread_num();
         uint64_t s = semente_base ^ (0x9E3779B97F4A7C15ULL * (uint64_t)(tid + 1));
 
-        #pragma omp for
+        #pragma omp for reduction(+:dentro)
         for (long i = 0; i < n; i++)
         {
             double x = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
