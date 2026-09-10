@@ -31,18 +31,24 @@ int main(int argc, char **argv)
     if (argc > 2)
         omp_set_num_threads(atoi(argv[2]));
 
-    uint64_t s = 88172645463325252ULL;
+    const uint64_t semente_base = 88172645463325252ULL;
     long dentro = 0;
 
     double t0 = agora();
 
-    #pragma omp parallel for
-    for (long i = 0; i < n; i++)
+    #pragma omp parallel
     {
-        double x = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
-        double y = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
-        if (x * x + y * y <= 1.0)
-            dentro++;
+        int tid = omp_get_thread_num();
+        uint64_t s = semente_base ^ (0x9E3779B97F4A7C15ULL * (uint64_t)(tid + 1));
+
+        #pragma omp for
+        for (long i = 0; i < n; i++)
+        {
+            double x = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
+            double y = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
+            if (x * x + y * y <= 1.0)
+                dentro++;
+        }
     }
 
     double pi = 4.0 * (double)dentro / (double)n;
