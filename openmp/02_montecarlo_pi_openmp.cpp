@@ -1,9 +1,9 @@
 /* Versao OpenMP — Estimativa de pi por Monte Carlo
  * IESB 2026/2 — CCO085 — Frente OpenMP
  *
- * Compilar: g++ -O2 -fopenmp -o 02_montecarlo_pi_openmp 02_montecarlo_pi_openmp.cpp
- * Executar: ./02_montecarlo_pi_openmp 50000000 4                   (n=50M, 4 threads, static)
- *           ./02_montecarlo_pi_openmp 50000000 4 dynamic 100000    (escalonamento e chunk)
+ * Compilar: g++ -O2 -fopenmp -I../comum -o 02_montecarlo_pi_openmp 02_montecarlo_pi_openmp.cpp
+ * Executar: ./02_montecarlo_pi_openmp 50000000 4                (n=50M, 4 threads, static)
+ *           ./02_montecarlo_pi_openmp 50000000 4 dynamic 8      (escalonamento e chunk, em blocos)
  */
 #include <cstdio>
 #include <cstdlib>
@@ -11,20 +11,15 @@
 #include <cstdint>
 #include <ctime>
 #include <omp.h>
+#include "xorshift.h"
+
+static const long BLOCO = 65536;
 
 static double agora()
 {
     timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
     return t.tv_sec + t.tv_nsec * 1e-9;
-}
-
-static inline uint64_t xorshift(uint64_t &s)
-{
-    s ^= s << 13;
-    s ^= s >> 7;
-    s ^= s << 17;
-    return s;
 }
 
 static bool ler_escalonamento(const char *nome, omp_sched_t &tipo)
@@ -56,18 +51,23 @@ int main(int argc, char **argv)
     }
     omp_set_schedule(tipo, chunk);
 
-    const uint64_t semente_base = 88172645463325252ULL;
+    const uint64_t semente = 88172645463325252ULL;
     long dentro = 0;
+    long blocos = (n + BLOCO - 1) / BLOCO;
 
     double t0 = agora();
 
-    #pragma omp parallel
-    {
-        int tid = omp_get_thread_num();
-        uint64_t s = semente_base ^ (0x9E3779B97F4A7C15ULL * (uint64_t)(tid + 1));
+    TabelaSalto tabela;
+    montar_tabela_salto(tabela);
 
-        #pragma omp for schedule(runtime) reduction(+:dentro)
-        for (long i = 0; i < n; i++)
+    #pragma omp parallel for schedule(runtime) reduction(+:dentro)
+    for (long b = 0; b < blocos; b++)
+    {
+        long inicio = b * BLOCO;
+        long fim = (inicio + BLOCO < n) ? inicio + BLOCO : n;
+        uint64_t s = saltar(tabela, semente, 2 * (uint64_t)inicio);
+
+        for (long i = inicio; i < fim; i++)
         {
             double x = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
             double y = (xorshift(s) >> 11) * (1.0 / 9007199254740992.0);
