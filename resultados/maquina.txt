@@ -1,4 +1,4 @@
-# Ambiente de medicao (alanna)
+# Ambiente de medicao
 # gerado por scripts/medir_omp.sh em 2026-11-04T19:46:43+00:00
 
 ## CPU (lscpu)
