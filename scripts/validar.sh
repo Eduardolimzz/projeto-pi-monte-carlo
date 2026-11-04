@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #
-# validar.sh — confere se a versao OpenMP chega ao mesmo resultado do baseline
+# validar.sh — confere se as versoes OpenMP e MPI chegam ao baseline
 # Programacao Paralela (CCO085) · IESB 2026/2
 #
-# Para cada N, roda o baseline e depois o OpenMP com varios numeros de threads
-# e politicas de escalonamento. O valor conferido e o "dentro" (a contagem exata
-# de pontos dentro do circulo), que tem que ser identico ao do baseline.
+# Para cada N, compara a contagem exata de pontos dentro do circulo com o
+# baseline, variando threads/politicas OpenMP e numeros de processos MPI.
 #
 # Uso: ./scripts/validar.sh
 # Saida: OK/FALHOU por N e codigo de saida diferente de 0 se algo falhar.
@@ -17,12 +16,17 @@ cd "$RAIZ"
 
 TAMANHOS=(${TAMANHOS:-1 1000 65537 1000003 50000000 100000000})
 THREADS=(${THREADS:-1 2 4 7 8 16 20})
+PROCESSOS=(${PROCESSOS:-1 2 4 7 8 12 16 20})
 ESCALONAMENTOS=("static" "dynamic 1" "dynamic 8" "guided")
+MPIEXEC="${MPIEXEC:-mpirun}"
+MPIEXEC_ARGS=(${MPIEXEC_ARGS:---use-hwthread-cpus})
+NUCLEOS="$(nproc)"
 
 BIN_SEQ="baseline/pi_seq"
 BIN_OMP="openmp/pi_omp"
+BIN_MPI="mpi/pi_mpi"
 
-make seq omp
+make seq omp mpi
 
 regex='dentro=([0-9]+)'
 
@@ -55,7 +59,27 @@ for n in "${TAMANHOS[@]}"; do
     done
 
     if (( falhas_n == 0 )); then
-        echo "OK      N=$n  dentro=$ref"
+        echo "OK OpenMP  N=$n  dentro=$ref"
+    fi
+
+    falhas_n=0
+    for p in "${PROCESSOS[@]}"; do
+        if (( p > NUCLEOS )); then
+            echo "MPI       N=$n processos=$p ignorado (a maquina tem $NUCLEOS nucleos logicos)"
+            continue
+        fi
+
+        obtido="$(dentro_de "$("$MPIEXEC" "${MPIEXEC_ARGS[@]}" -np "$p" "./$BIN_MPI" "$n")")"
+        testes=$(( testes + 1 ))
+        if [[ "$obtido" != "$ref" ]]; then
+            echo "FALHOU MPI  N=$n processos=$p  baseline=$ref mpi=$obtido"
+            falhas=$(( falhas + 1 ))
+            falhas_n=$(( falhas_n + 1 ))
+        fi
+    done
+
+    if (( falhas_n == 0 )); then
+        echo "OK MPI      N=$n  dentro=$ref"
     fi
 done
 

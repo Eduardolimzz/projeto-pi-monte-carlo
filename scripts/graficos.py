@@ -40,6 +40,15 @@ def eixo_threads(ax, threads):
     ax.grid(True, alpha=0.3)
 
 
+def eixo_processos(ax, processos):
+    ax.set_xscale("log", base=2)
+    ax.set_xticks(processos)
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.minorticks_off()
+    ax.set_xlabel("processos MPI")
+    ax.grid(True, alpha=0.3)
+
+
 def salvar(fig, nome):
     os.makedirs(SAIDA, exist_ok=True)
     caminho = os.path.join(SAIDA, f"{nome}.png")
@@ -163,10 +172,125 @@ def grafico_escala_fraca():
     salvar(fig, "escala_fraca")
 
 
+def graficos_mpi():
+    arquivo = os.path.join(RESULTADOS, "resultado_mpi.csv")
+    if not os.path.exists(arquivo):
+        print("ignorado: resultados/resultado_mpi.csv ainda nao existe")
+        return
+
+    tempos = defaultdict(list)
+    reducoes = defaultdict(list)
+    for r in ler("resultado_mpi.csv"):
+        n = int(r["N"])
+        p = int(r["processos"])
+        tempo = float(r["tempo_s"])
+        tempos[(n, r["versao"], p)].append(tempo)
+        if r["versao"] == "mpi" and r.get("mpi_reduce_s"):
+            reducoes[(n, p)].append(float(r["mpi_reduce_s"]))
+
+    tamanhos = sorted({k[0] for k in tempos})
+    processos = sorted({k[2] for k in tempos if k[1] == "mpi"})
+    mediana = {k: statistics.median(v) for k, v in tempos.items()}
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for i, n in enumerate(tamanhos):
+        med = [mediana[(n, "mpi", p)] for p in processos]
+        menor = [med[j] - min(tempos[(n, "mpi", p)]) for j, p in enumerate(processos)]
+        maior = [max(tempos[(n, "mpi", p)]) - med[j] for j, p in enumerate(processos)]
+        ax.errorbar(processos, med, yerr=[menor, maior], marker="o", capsize=3,
+                    color=CORES_N[i], label=f"N = {n:.0e}")
+        ax.axhline(mediana[(n, "seq", 1)], color=CORES_N[i], linestyle=":", alpha=0.7)
+    ax.set_yscale("log")
+    ax.set_ylabel("tempo (s)")
+    ax.set_title("Tempo de execucao MPI\npontilhado = baseline sequencial")
+    eixo_processos(ax, processos)
+    ax.legend()
+    salvar(fig, "mpi_tempo")
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for i, n in enumerate(tamanhos):
+        base = mediana[(n, "seq", 1)]
+        ax.plot(processos, [base / mediana[(n, "mpi", p)] for p in processos], marker="o",
+                color=CORES_N[i], label=f"N = {n:.0e}")
+    ax.plot(processos, processos, "k--", label="ideal (S = processos)")
+    ax.plot(processos, [1 / ((1 - P_AMDAHL) + P_AMDAHL / p) for p in processos], "k:",
+            label=f"Amdahl (P = {P_AMDAHL})")
+    ax.set_ylabel("speedup")
+    ax.set_title("Speedup do MPI")
+    eixo_processos(ax, processos)
+    ax.legend()
+    salvar(fig, "mpi_speedup")
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for i, n in enumerate(tamanhos):
+        base = mediana[(n, "seq", 1)]
+        ax.plot(processos, [100 * base / mediana[(n, "mpi", p)] / p for p in processos], marker="o",
+                color=CORES_N[i], label=f"N = {n:.0e}")
+    ax.axhline(100, color="k", linestyle="--")
+    ax.set_ylabel("eficiencia (%)")
+    ax.set_ylim(0, 110)
+    ax.set_title("Eficiencia do MPI")
+    eixo_processos(ax, processos)
+    ax.legend()
+    salvar(fig, "mpi_eficiencia")
+
+    if reducoes:
+        fig, ax = plt.subplots(figsize=(7, 4.5))
+        for i, n in enumerate(tamanhos):
+            chaves = [(n, p) for p in processos if (n, p) in reducoes]
+            ps = [p for _, p in chaves]
+            med = [statistics.median(reducoes[k]) for k in chaves]
+            ax.plot(ps, med, marker="o", color=CORES_N[i], label=f"N = {n:.0e}")
+        ax.set_ylabel("tempo maximo em MPI_Reduce (s)")
+        ax.set_title("Tempo observado na reducao MPI\n(inclui espera de sincronizacao)")
+        eixo_processos(ax, processos)
+        ax.legend()
+        salvar(fig, "mpi_reducao")
+
+
+def grafico_escala_fraca_mpi():
+    arquivo = os.path.join(RESULTADOS, "resultado_escala_fraca_mpi.csv")
+    if not os.path.exists(arquivo):
+        print("ignorado: resultados/resultado_escala_fraca_mpi.csv ainda nao existe")
+        return
+
+    tempos = defaultdict(list)
+    n0 = None
+    for r in ler("resultado_escala_fraca_mpi.csv"):
+        tempos[int(r["processos"])].append(float(r["tempo_s"]))
+        n0 = int(r["N0"])
+
+    processos = sorted(tempos)
+    med = [statistics.median(tempos[p]) for p in processos]
+    menor = [m - min(tempos[p]) for m, p in zip(med, processos)]
+    maior = [max(tempos[p]) - m for m, p in zip(med, processos)]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
+    ax1.errorbar(processos, med, yerr=[menor, maior], marker="o", capsize=3, color=CORES_N[0])
+    ax1.axhline(med[0], color="k", linestyle="--", label="ideal (tempo constante)")
+    ax1.set_ylabel("tempo (s)")
+    ax1.set_ylim(0, max(med) * 1.3)
+    ax1.set_title(f"Tempo com N = {n0:.0e} x processos")
+    eixo_processos(ax1, processos)
+    ax1.legend()
+
+    ax2.plot(processos, [100 * med[0] / m for m in med], marker="o", color=CORES_N[0])
+    ax2.axhline(100, color="k", linestyle="--")
+    ax2.set_ylabel("eficiencia fraca (%) = T(1) / T(p)")
+    ax2.set_ylim(0, 110)
+    ax2.set_title("Escalabilidade fraca MPI")
+    eixo_processos(ax2, processos)
+
+    fig.suptitle("Escalabilidade fraca do MPI")
+    salvar(fig, "mpi_escala_fraca")
+
+
 def main():
     graficos_speedup()
     grafico_schedule()
     grafico_escala_fraca()
+    graficos_mpi()
+    grafico_escala_fraca_mpi()
 
 
 if __name__ == "__main__":
