@@ -8,15 +8,14 @@
 # Protocolo: 6 execucoes por configuracao, a 1a e aquecimento (descartada), e o
 # tempo e o que o PROPRIO programa imprime.
 #
-# Uso:   MAQUINA=alanna ./scripts/medir_schedule.sh
-# Saida: resultados/resultado_schedule_<MAQUINA>.csv
+# Uso:   ./scripts/medir_schedule.sh
+# Saida: resultados/resultado_schedule.csv
 
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$RAIZ"
 
-MAQUINA="${MAQUINA:-local}"
 N="${N:-1000000000}"
 THREADS=(${THREADS:-8 20})
 REPETICOES="${REPETICOES:-6}"
@@ -24,7 +23,7 @@ AQUECIMENTOS=1
 CONFIGS=("static 0" "static 1" "dynamic 1" "dynamic 8" "dynamic 64" "guided 0" "guided 8")
 
 BIN_OMP="openmp/pi_omp"
-CSV="resultados/resultado_schedule_${MAQUINA}.csv"
+CSV="resultados/resultado_schedule.csv"
 NUCLEOS="$(nproc)"
 
 mkdir -p resultados

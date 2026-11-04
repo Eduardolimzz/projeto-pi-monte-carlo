@@ -8,15 +8,14 @@
 #   - 6 execucoes por configuracao, sendo a 1a aquecimento (descartada);
 #   - o tempo e o que o PROPRIO programa imprime, nunca medicao externa.
 #
-# Uso:   MAQUINA=alanna ./scripts/medir_omp.sh
-# Saida: resultados/resultado_openmp_<MAQUINA>.csv e resultados/maquina_<MAQUINA>.txt
+# Uso:   ./scripts/medir_omp.sh
+# Saida: resultados/resultado_openmp.csv e resultados/maquina.txt
 
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$RAIZ"
 
-MAQUINA="${MAQUINA:-local}"
 THREADS=(${THREADS:-1 2 4 8 16 20})
 TAMANHOS=(${TAMANHOS:-100000000 500000000 1000000000})
 REPETICOES="${REPETICOES:-6}"
@@ -24,8 +23,8 @@ AQUECIMENTOS=1
 
 BIN_SEQ="baseline/pi_seq"
 BIN_OMP="openmp/pi_omp"
-CSV="resultados/resultado_openmp_${MAQUINA}.csv"
-INFO="resultados/maquina_${MAQUINA}.txt"
+CSV="resultados/resultado_openmp.csv"
+INFO="resultados/maquina.txt"
 NUCLEOS="$(nproc)"
 
 mkdir -p resultados
@@ -35,7 +34,7 @@ make seq omp
 
 echo ">> coletando dados da maquina em $INFO"
 {
-    echo "# Ambiente de medicao ($MAQUINA)"
+    echo "# Ambiente de medicao"
     echo "# gerado por scripts/medir_omp.sh em $(date -Is)"
     echo
     echo "## CPU (lscpu)"
