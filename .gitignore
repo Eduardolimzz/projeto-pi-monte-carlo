@@ -1,5 +1,6 @@
 # executáveis
 sequencial/pi_seq
+baseline/pi_seq
 openmp/pi_omp
 mpi/pi_mpi
 *.exe
