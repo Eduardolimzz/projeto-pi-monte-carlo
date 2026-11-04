@@ -23,8 +23,8 @@ omp: $(OMP_BIN)
 $(SEQ_BIN): $(SEQ_SRC)
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
-$(OMP_BIN): $(OMP_SRC)
-	$(CXX) $(CXXFLAGS) -fopenmp -o $@ $<
+$(OMP_BIN): $(OMP_SRC) comum/xorshift.h
+	$(CXX) $(CXXFLAGS) -fopenmp -Icomum -o $@ $<
 
 clean:
 	rm -f $(SEQ_BIN) $(OMP_BIN)
