@@ -1,5 +1,5 @@
 # Ambiente de medicao (alanna)
-# gerado por scripts/medir_omp.sh em 2026-11-04T18:41:37+00:00
+# gerado por scripts/medir_omp.sh em 2026-11-04T19:46:43+00:00
 
 ## CPU (lscpu)
 Architecture:                         x86_64
@@ -46,11 +46,11 @@ nproc: 20
 
 ## Memoria (free -h)
                total        used        free      shared  buff/cache   available
-Mem:           7.6Gi       724Mi       6.7Gi       4.2Mi       394Mi       6.9Gi
+Mem:           7.6Gi       740Mi       6.5Gi       4.2Mi       541Mi       6.9Gi
 Swap:          2.0Gi          0B       2.0Gi
 
 ## Sistema (uname -a)
-Linux 113e3d867eab 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+Linux 8f7aa7b5a335 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
 
 ## Compilador (g++ --version)
 g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
@@ -61,4 +61,4 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Comandos de compilacao (make)
 g++ -O2 -Wall -o baseline/pi_seq baseline/02_montecarlo_pi.cpp
-g++ -O2 -Wall -fopenmp -o openmp/pi_omp openmp/02_montecarlo_pi_openmp.cpp
+g++ -O2 -Wall -fopenmp -Icomum -o openmp/pi_omp openmp/02_montecarlo_pi_openmp.cpp
