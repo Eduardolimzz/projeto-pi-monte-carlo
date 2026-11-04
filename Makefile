@@ -1,22 +1,30 @@
 # Makefile do Projeto Academico — Estimativa de pi por Monte Carlo
 # Programacao Paralela (CCO085) · IESB 2026/2
 #
-# Alvos futuros para openmp/ e mpi/ serao adicionados aqui.
+# Alvo futuro para mpi/ sera adicionado aqui.
 
 CXX      = g++
 CXXFLAGS = -O2 -Wall
 
-SEQ_SRC = sequencial/02_montecarlo_pi.cpp
-SEQ_BIN = sequencial/pi_seq
+SEQ_SRC = baseline/02_montecarlo_pi.cpp
+SEQ_BIN = baseline/pi_seq
 
-.PHONY: all seq clean
+OMP_SRC = openmp/02_montecarlo_pi_openmp.cpp
+OMP_BIN = openmp/pi_omp
 
-all: seq
+.PHONY: all seq omp clean
+
+all: seq omp
 
 seq: $(SEQ_BIN)
+
+omp: $(OMP_BIN)
 
 $(SEQ_BIN): $(SEQ_SRC)
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
+$(OMP_BIN): $(OMP_SRC) comum/xorshift.h
+	$(CXX) $(CXXFLAGS) -fopenmp -Icomum -o $@ $<
+
 clean:
-	rm -f $(SEQ_BIN)
+	rm -f $(SEQ_BIN) $(OMP_BIN)

@@ -1,7 +1,9 @@
 # executáveis
 sequencial/pi_seq
+baseline/pi_seq
 openmp/pi_omp
 mpi/pi_mpi
+*.exe
 # lixo de compilação e perfilamento
 *.o
 gmon.out
