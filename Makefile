@@ -6,8 +6,8 @@
 CXX      = g++
 CXXFLAGS = -O2 -Wall
 
-SEQ_SRC = sequencial/02_montecarlo_pi.cpp
-SEQ_BIN = sequencial/pi_seq
+SEQ_SRC = baseline/02_montecarlo_pi.cpp
+SEQ_BIN = baseline/pi_seq
 
 .PHONY: all seq clean
 
