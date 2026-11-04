@@ -9,22 +9,21 @@
 # Protocolo: 6 execucoes por configuracao, a 1a e aquecimento (descartada), e o
 # tempo e o que o PROPRIO programa imprime.
 #
-# Uso:   MAQUINA=alanna ./scripts/medir_escala_fraca.sh
-# Saida: resultados/resultado_escala_fraca_<MAQUINA>.csv
+# Uso:   ./scripts/medir_escala_fraca.sh
+# Saida: resultados/resultado_escala_fraca.csv
 
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$RAIZ"
 
-MAQUINA="${MAQUINA:-local}"
 N0="${N0:-100000000}"
 THREADS=(${THREADS:-1 2 4 8 16 20})
 REPETICOES="${REPETICOES:-6}"
 AQUECIMENTOS=1
 
 BIN_OMP="openmp/pi_omp"
-CSV="resultados/resultado_escala_fraca_${MAQUINA}.csv"
+CSV="resultados/resultado_escala_fraca.csv"
 NUCLEOS="$(nproc)"
 
 mkdir -p resultados

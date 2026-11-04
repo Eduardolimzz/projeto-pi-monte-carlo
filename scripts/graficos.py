@@ -2,12 +2,10 @@
 """Gera os graficos do projeto a partir dos CSVs de resultados/.
 
 Uso:   python scripts/graficos.py
-Saida: resultados/graficos/<maquina>_*.png (um conjunto de graficos por maquina)
+Saida: resultados/graficos/*.png
 """
 import csv
-import glob
 import os
-import re
 import statistics
 from collections import defaultdict
 
@@ -28,17 +26,9 @@ CORES = {"static": "#1f77b4", "dynamic": "#ff7f0e", "guided": "#2ca02c"}
 CORES_N = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
 
 
-def ler(caminho):
-    with open(caminho, newline="") as f:
+def ler(nome):
+    with open(os.path.join(RESULTADOS, nome), newline="") as f:
         return list(csv.DictReader(f))
-
-
-def maquinas(prefixo):
-    achados = {}
-    for caminho in glob.glob(os.path.join(RESULTADOS, f"resultado_{prefixo}_*.csv")):
-        nome = re.match(rf"resultado_{prefixo}_(.+)\.csv", os.path.basename(caminho)).group(1)
-        achados[nome] = caminho
-    return achados
 
 
 def eixo_threads(ax, threads):
@@ -50,18 +40,18 @@ def eixo_threads(ax, threads):
     ax.grid(True, alpha=0.3)
 
 
-def salvar(fig, maquina, nome):
+def salvar(fig, nome):
     os.makedirs(SAIDA, exist_ok=True)
-    caminho = os.path.join(SAIDA, f"{maquina}_{nome}.png")
+    caminho = os.path.join(SAIDA, f"{nome}.png")
     fig.tight_layout()
     fig.savefig(caminho, dpi=150)
     plt.close(fig)
     print("gerado:", os.path.relpath(caminho, RAIZ))
 
 
-def graficos_speedup(maquina, caminho):
+def graficos_speedup():
     tempos = defaultdict(list)
-    for r in ler(caminho):
+    for r in ler("resultado_openmp.csv"):
         tempos[(int(r["N"]), r["versao"], int(r["threads"]))].append(float(r["tempo_s"]))
 
     tamanhos = sorted({k[0] for k in tempos})
@@ -79,10 +69,10 @@ def graficos_speedup(maquina, caminho):
         ax.axhline(mediana[(n, "seq", 1)], color=CORES_N[i], linestyle=":", alpha=0.7)
     ax.set_yscale("log")
     ax.set_ylabel("tempo (s)")
-    ax.set_title(f"Tempo de execucao OpenMP ({maquina})\npontilhado = baseline sequencial")
+    ax.set_title("Tempo de execucao do OpenMP\npontilhado = baseline sequencial")
     eixo_threads(ax, threads)
     ax.legend()
-    salvar(fig, maquina, "tempo")
+    salvar(fig, "tempo")
 
     # speedup
     fig, ax = plt.subplots(figsize=(7, 4.5))
@@ -94,10 +84,10 @@ def graficos_speedup(maquina, caminho):
     ax.plot(threads, [1 / ((1 - P_AMDAHL) + P_AMDAHL / t) for t in threads], "k:",
             label=f"Amdahl (P = {P_AMDAHL})")
     ax.set_ylabel("speedup")
-    ax.set_title(f"Speedup do OpenMP ({maquina})")
+    ax.set_title("Speedup do OpenMP")
     eixo_threads(ax, threads)
     ax.legend()
-    salvar(fig, maquina, "speedup")
+    salvar(fig, "speedup")
 
     # eficiencia
     fig, ax = plt.subplots(figsize=(7, 4.5))
@@ -108,15 +98,15 @@ def graficos_speedup(maquina, caminho):
     ax.axhline(100, color="k", linestyle="--")
     ax.set_ylabel("eficiencia (%)")
     ax.set_ylim(0, 110)
-    ax.set_title(f"Eficiencia do OpenMP ({maquina})")
+    ax.set_title("Eficiencia do OpenMP")
     eixo_threads(ax, threads)
     ax.legend()
-    salvar(fig, maquina, "eficiencia")
+    salvar(fig, "eficiencia")
 
 
-def grafico_schedule(maquina, caminho):
+def grafico_schedule():
     tempos = defaultdict(list)
-    for r in ler(caminho):
+    for r in ler("resultado_schedule.csv"):
         tempos[(int(r["threads"]), r["politica"], int(r["chunk"]))].append(float(r["tempo_s"]))
 
     threads = sorted({k[0] for k in tempos})
@@ -137,14 +127,14 @@ def grafico_schedule(maquina, caminho):
         ax.set_ylabel("tempo (s)")
         ax.set_title(f"{t} threads")
         ax.grid(True, axis="y", alpha=0.3)
-    fig.suptitle(f"Politicas de escalonamento ({maquina}) - mediana e min/max; chunk em blocos de 65536")
-    salvar(fig, maquina, "schedule")
+    fig.suptitle("Politicas de escalonamento - mediana e min/max; chunk em blocos de 65536")
+    salvar(fig, "schedule")
 
 
-def grafico_escala_fraca(maquina, caminho):
+def grafico_escala_fraca():
     tempos = defaultdict(list)
     n0 = None
-    for r in ler(caminho):
+    for r in ler("resultado_escala_fraca.csv"):
         tempos[int(r["threads"])].append(float(r["tempo_s"]))
         n0 = int(r["N0"])
 
@@ -169,17 +159,14 @@ def grafico_escala_fraca(maquina, caminho):
     ax2.set_title("Eficiencia da escalabilidade fraca")
     eixo_threads(ax2, threads)
 
-    fig.suptitle(f"Escalabilidade fraca do OpenMP ({maquina})")
-    salvar(fig, maquina, "escala_fraca")
+    fig.suptitle("Escalabilidade fraca do OpenMP")
+    salvar(fig, "escala_fraca")
 
 
 def main():
-    for maquina, caminho in maquinas("openmp").items():
-        graficos_speedup(maquina, caminho)
-    for maquina, caminho in maquinas("schedule").items():
-        grafico_schedule(maquina, caminho)
-    for maquina, caminho in maquinas("escala_fraca").items():
-        grafico_escala_fraca(maquina, caminho)
+    graficos_speedup()
+    grafico_schedule()
+    grafico_escala_fraca()
 
 
 if __name__ == "__main__":
