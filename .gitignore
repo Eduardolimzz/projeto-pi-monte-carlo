@@ -7,3 +7,4 @@ mpi/pi_mpi
 # lixo de compilação e perfilamento
 *.o
 gmon.out
+.venv/
