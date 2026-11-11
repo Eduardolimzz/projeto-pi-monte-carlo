@@ -3,6 +3,8 @@ sequencial/pi_seq
 baseline/pi_seq
 openmp/pi_omp
 mpi/pi_mpi
+openmp/experimentos/comparar_sincronizacao
+openmp/experimentos/diagnostico_threads
 *.exe
 # lixo de compilação e perfilamento
 *.o
