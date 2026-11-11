@@ -76,6 +76,17 @@ pip install matplotlib
 python scripts/graficos.py     # gera resultados/graficos/*.png a partir dos CSVs
 ```
 
+### Experimentos de apoio (OpenMP)
+
+Dois programas pequenos, em `openmp/experimentos/`, sustentam a análise do OpenMP e não entram no `make all` (compile com `make exp`):
+
+- `comparar_sincronizacao.cpp`: custo de proteger o contador com `reduction`, `atomic` ou `critical`.
+- `diagnostico_threads.cpp`: blocos processados, tempo ocupado e espera no fim do laço, por thread.
+
+```bash
+./scripts/experimentos_omp.sh     # roda os dois e salva resultados/experimentos_omp.txt (uns 2 minutos)
+```
+
 ## Decisão de projeto: resultado idêntico ao baseline
 
 Se cada thread ou processo usasse uma semente própria, o `dentro` ficaria parecido com o do baseline, mas não igual, e mudaria com o número de threads. Como o xorshift é linear sobre os bits do estado, `comum/xorshift.h` calcula onde a sequência do baseline estaria depois de `k` passos sem percorrê-los (matrizes de 64×64 bits elevadas por quadrados). Cada bloco de iterações (OpenMP) ou cada intervalo (MPI) salta direto para o seu ponto de partida, e a soma dos acertos é a mesma de uma execução sequencial. O teste do salto está em `comum/teste_salto.cpp`.

@@ -19,6 +19,7 @@ Problema nº 2: estimativa de π por Monte Carlo
 **Alanna — OpenMP**
 - `openmp/02_montecarlo_pi_openmp.cpp`: laço paralelo por blocos, com `reduction(+:dentro)` e escolha do escalonamento por argumento.
 - `comum/xorshift.h` e `comum/teste_salto.cpp`: salto no xorshift, que faz o resultado bater exatamente com o baseline (usado também pelo MPI).
+- `openmp/experimentos/` e `scripts/experimentos_omp.sh`: custo de `reduction` contra `atomic` e `critical`, e diagnóstico por thread.
 - `scripts/validar.sh`, `scripts/medir_omp.sh`, `scripts/medir_schedule.sh`, `scripts/medir_escala_fraca.sh` e `scripts/graficos.py`.
 - `resultados/resultado_openmp.csv`, `resultado_schedule.csv`, `resultado_escala_fraca.csv`, `maquina.txt` e os gráficos de OpenMP.
 
