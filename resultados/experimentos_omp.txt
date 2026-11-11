@@ -1,0 +1,51 @@
+# Experimentos de apoio — OpenMP
+# gerado por scripts/experimentos_omp.sh em 2026-11-11T15:05:43+00:00
+# nproc: 20
+
+## baseline sequencial, N=20000000
+n=20000000  pi=3.141107  dentro=15705533  tempo=0.226202 s
+
+## reduction x atomic x critical, N=20000000
+reduction n=20000000  threads=1  dentro=15705533  tempo=0.218 s
+reduction n=20000000  threads=1  dentro=15705533  tempo=0.235 s
+reduction n=20000000  threads=1  dentro=15705533  tempo=0.229 s
+atomic    n=20000000  threads=1  dentro=15705533  tempo=0.470 s
+atomic    n=20000000  threads=1  dentro=15705533  tempo=0.425 s
+atomic    n=20000000  threads=1  dentro=15705533  tempo=0.435 s
+critical  n=20000000  threads=1  dentro=15705533  tempo=0.675 s
+critical  n=20000000  threads=1  dentro=15705533  tempo=0.646 s
+critical  n=20000000  threads=1  dentro=15705533  tempo=0.741 s
+
+reduction n=20000000  threads=8  dentro=15705533  tempo=0.039 s
+reduction n=20000000  threads=8  dentro=15705533  tempo=0.049 s
+reduction n=20000000  threads=8  dentro=15705533  tempo=0.060 s
+atomic    n=20000000  threads=8  dentro=15705533  tempo=1.099 s
+atomic    n=20000000  threads=8  dentro=15705533  tempo=0.814 s
+atomic    n=20000000  threads=8  dentro=15705533  tempo=0.763 s
+critical  n=20000000  threads=8  dentro=15705533  tempo=6.094 s
+critical  n=20000000  threads=8  dentro=15705533  tempo=5.278 s
+critical  n=20000000  threads=8  dentro=15705533  tempo=6.264 s
+
+reduction n=20000000  threads=20  dentro=15705533  tempo=0.041 s
+reduction n=20000000  threads=20  dentro=15705533  tempo=0.053 s
+reduction n=20000000  threads=20  dentro=15705533  tempo=0.047 s
+atomic    n=20000000  threads=20  dentro=15705533  tempo=0.877 s
+atomic    n=20000000  threads=20  dentro=15705533  tempo=0.823 s
+atomic    n=20000000  threads=20  dentro=15705533  tempo=0.868 s
+critical  n=20000000  threads=20  dentro=15705533  tempo=16.555 s
+critical  n=20000000  threads=20  dentro=15705533  tempo=16.521 s
+critical  n=20000000  threads=20  dentro=15705533  tempo=13.608 s
+
+## espera no fim do laco, N=1000000000
+static  chunk=0  threads=20  total=1.021 s  fim: min=0.701 media=0.821 max=1.020  espera media no fim=19.6%  blocos/thread: min=762 max=763  dentro=785405278
+static  chunk=0  threads=20  total=1.088 s  fim: min=0.693 media=0.825 max=1.088  espera media no fim=24.2%  blocos/thread: min=762 max=763  dentro=785405278
+static  chunk=0  threads=20  total=1.019 s  fim: min=0.657 media=0.791 max=1.015  espera media no fim=22.1%  blocos/thread: min=762 max=763  dentro=785405278
+dynamic chunk=8  threads=20  total=1.026 s  fim: min=1.012 media=1.017 max=1.026  espera media no fim= 0.8%  blocos/thread: min=496 max=1008  dentro=785405278
+dynamic chunk=8  threads=20  total=1.005 s  fim: min=0.990 media=0.996 max=1.005  espera media no fim= 0.9%  blocos/thread: min=512 max=960  dentro=785405278
+dynamic chunk=8  threads=20  total=0.873 s  fim: min=0.856 media=0.862 max=0.873  espera media no fim= 1.2%  blocos/thread: min=424 max=976  dentro=785405278
+static  chunk=0  threads= 8  total=1.623 s  fim: min=1.506 media=1.556 max=1.623  espera media no fim= 4.1%  blocos/thread: min=1907 max=1908  dentro=785405278
+static  chunk=0  threads= 8  total=1.653 s  fim: min=1.502 media=1.552 max=1.653  espera media no fim= 6.1%  blocos/thread: min=1907 max=1908  dentro=785405278
+static  chunk=0  threads= 8  total=1.611 s  fim: min=1.541 media=1.581 max=1.611  espera media no fim= 1.8%  blocos/thread: min=1907 max=1908  dentro=785405278
+dynamic chunk=8  threads= 8  total=1.581 s  fim: min=1.577 media=1.579 max=1.581  espera media no fim= 0.1%  blocos/thread: min=1800 max=1952  dentro=785405278
+dynamic chunk=8  threads= 8  total=1.760 s  fim: min=1.743 media=1.747 max=1.760  espera media no fim= 0.8%  blocos/thread: min=1832 max=1992  dentro=785405278
+dynamic chunk=8  threads= 8  total=1.677 s  fim: min=1.673 media=1.675 max=1.677  espera media no fim= 0.1%  blocos/thread: min=1803 max=1984  dentro=785405278
