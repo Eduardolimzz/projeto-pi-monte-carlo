@@ -16,7 +16,9 @@ OMP_BIN = openmp/pi_omp
 MPI_SRC = mpi/02_montecarlo_pi_mpi.cpp
 MPI_BIN = mpi/pi_mpi
 
-.PHONY: all seq omp mpi clean
+EXP_BINS = openmp/experimentos/comparar_sincronizacao openmp/experimentos/diagnostico_threads
+
+.PHONY: all seq omp mpi exp clean
 
 all: seq omp mpi
 
@@ -25,6 +27,9 @@ seq: $(SEQ_BIN)
 omp: $(OMP_BIN)
 
 mpi: $(MPI_BIN)
+
+# experimentos de apoio da analise do OpenMP (nao entram no "all")
+exp: $(EXP_BINS)
 
 $(SEQ_BIN): $(SEQ_SRC)
 	$(CXX) $(CXXFLAGS) -o $@ $<
@@ -35,5 +40,8 @@ $(OMP_BIN): $(OMP_SRC) comum/xorshift.h
 $(MPI_BIN): $(MPI_SRC) comum/xorshift.h
 	$(MPICXX) $(CXXFLAGS) -Icomum -o $@ $<
 
+openmp/experimentos/%: openmp/experimentos/%.cpp comum/xorshift.h
+	$(CXX) $(CXXFLAGS) -fopenmp -Icomum -o $@ $<
+
 clean:
-	rm -f $(SEQ_BIN) $(OMP_BIN) $(MPI_BIN)
+	rm -f $(SEQ_BIN) $(OMP_BIN) $(MPI_BIN) $(EXP_BINS)
