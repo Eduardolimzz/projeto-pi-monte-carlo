@@ -5,6 +5,37 @@
  * Executar: ./02_montecarlo_pi_openmp 50000000 4                (n=50M, 4 threads, static)
  *           ./02_montecarlo_pi_openmp 50000000 4 dynamic 8      (escalonamento e chunk, em blocos)
  */
+
+/* Decisoes de projeto e discussao dos resultados
+ *
+ * Padrao: laco paralelo sobre blocos de 65536 iteracoes. As iteracoes sao
+ * independentes e iguais, entao sections e tasks nao se aplicam.
+ *
+ * Resultado exato: cada bloco salta o xorshift ate o seu ponto de partida
+ * (comum/xorshift.h). O "dentro" fica igual ao do baseline para qualquer
+ * numero de threads e escalonamento (scripts/validar.sh).
+ *
+ * Condicao de corrida: "dentro" usa reduction(+:dentro). Cada thread soma numa
+ * copia privada e o OpenMP combina no fim. critical e atomic dao o mesmo
+ * resultado, mas sincronizam a cada incremento: com N=20M e 8 threads levaram
+ * 6,09 s e 0,81 s, contra 0,049 s do reduction (sequencial: 0,23 s).
+ * Dados em resultados/experimentos_omp.txt.
+ *
+ * Escalonamento: schedule(runtime), static por padrao. Com 8 threads static,
+ * dynamic e guided empatam. Com 20 threads as threads ficam com velocidades
+ * diferentes: no static as mais rapidas esperam em media de 11 a 24% do tempo
+ * pelas mais lentas (dynamic: ate 1,5%), em 10 repeticoes de
+ * openmp/experimentos/diagnostico_threads.cpp. O ganho em tempo total do
+ * dynamic variou de 2% a 31% entre repeticoes.
+ *
+ * Speedup (N=1e9, i7-13700H): 7,5x com 8 threads, 13,5x com 16 e 12,2x com 20
+ * (resultados/resultado_openmp.csv). Amdahl com P=0,999998 preve cerca de 20x
+ * com 20 threads, entao a fracao sequencial nao explica a diferenca. Causa
+ * medida: desbalanceamento entre threads. Hipotese nao comprovada:
+ * hyper-threading e nucleos de eficiencia. Sem medir, por raciocinio: nao ha
+ * false sharing (nada compartilhado e escrito no laco) nem limite de banda de
+ * memoria (o laco nao acessa vetores).
+ */
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
